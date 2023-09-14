@@ -50,9 +50,10 @@ clean_mbr_part_table:
 	rm -rf bin/mbr_part_table.out
 
 bin/mbr_part_table.bin: clean_mbr_part_table
-	nasm boot/gdt.s -f elf32 -o bin/gdt.o
+	nasm protocol/protocol_util.s -f elf32 -o bin/putil.o
+	nasm protocol/enter_rmode.s -f elf32 -o bin/enter_rmode.o
 	g++ $(FLAGS) -I include/ boot/mbr_part_table.cpp -o bin/mbr_part_table.o
-	ld -m elf_i386 -Tlinker/mbr_part_table.ld -nostdlib --nmagic -o bin/mbr_part_table.out bin/mbr_part_table.o bin/gdt.o
+	ld -m elf_i386 -Tlinker/mbr_part_table.ld -nostdlib --nmagic -o bin/mbr_part_table.out bin/mbr_part_table.o bin/putil.o
 	objcopy -O binary bin/mbr_part_table.out bin/mbr_part_table.bin
 	cd config && make format_mbr_part_table
 
@@ -63,7 +64,7 @@ clean_fs_worker:
 
 bin/fs_worker.bin: clean_fs_worker
 	g++ $(FLAGS) -I include/ -o bin/fs_worker.o boot/fs_worker.cpp
-	ld -m elf_i386 -Tlinker/fs_worker.ld -nostdlib --nmagic -o bin/fs_worker.out bin/fs_worker.o
+	ld -m elf_i386 -Tlinker/fs_worker.ld -nostdlib --nmagic -o bin/fs_worker.out bin/fs_worker.o bin/enter_rmode.o
 	objcopy -O binary bin/fs_worker.out bin/fs_worker.bin
 	cd config && make format_fs_worker
 
@@ -73,10 +74,11 @@ clean_second_stage:
 	rm -rf bin/second_stage.out
 
 bin/second_stage.bin: clean_second_stage
-	g++ $(FLAGS) -I include/ -o bin/second_stage.o boot/second_stage.cpp
-	ld -m elf_i386 -Tlinker/second_stage.ld -nostdlib --nmagic -o bin/second_stage.out bin/second_stage.o bin/gdt.o
-	objcopy -O binary bin/second_stage.out bin/second_stage.bin
-	cd config && make format_second_stage
+	nasm boot/second_stage.s -f bin -o bin/second_stage.bin
+#cd config && make format_second_stage
+#g++ $(FLAGS) -I include/ -o bin/second_stage.o boot/second_stage.cpp
+#ld -m elf_i386 -Tlinker/second_stage.ld -nostdlib --nmagic -o bin/second_stage.out bin/second_stage.o bin/putil.o
+#objcopy -O binary bin/second_stage.out bin/second_stage.bin
 
 clean:
 	cd config && make old_makefile

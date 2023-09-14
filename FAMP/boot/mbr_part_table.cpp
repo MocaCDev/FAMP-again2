@@ -31,7 +31,7 @@ void __START main()
     //pentry = (struct partition_entry *) (THIRD_ENTRY);
     //read_in_memory(FS_WORKER_PROGRAM_ADDRESS / 16, pentry->starting_sector, pentry->sector_amnt);
     
-    __load_gdt();
+    //__cpu_mode_rm_to_pm();
     //_init_pm();
 
     while(true);

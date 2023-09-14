@@ -72,16 +72,37 @@ int main(int args, char *argv[])
 
     if(strcmp((pint8) argv[1], "disk_image") == 0)
     {
+        /* TODO: Make it to where all the programs that run are before any program that
+        *        just stores data (ProgramName::FILESYSTEM).
+        *
+        * The order should be:
+        *   ProgramName::MBR
+        *   ProgramName::MBR_PART_TABLE_PROGRAM
+        *   ProgramName::SECOND_STAGE
+        *   ProgramName::FILESYSTEM
+        *
+        * Too lazy to fix it right now, will do tomorrow.
+        * This change will require some tweaks to the MBR partition table entries
+        * alongside some changes to the file `config_files.hpp`.
+        *
+        * What I might do is make the second stage bootloader an assembly program
+        * for a little more control over things. I also believe writing the second stage bootloader
+        * in assembly will make things go smoother with how the overall OS is structured (memory wise).
+        *
+        * */
         FormatDiskImage fdimg(ProgramName::MBR);
         fdimg.write_program_to_disk_image();
 
-        fdimg.switch_program(ProgramName::MBR_PART_TABLE_PROGRAM);
+        //fdimg.switch_program(ProgramName::MBR_PART_TABLE_PROGRAM);
+        //fdimg.write_program_to_disk_image();
+
+        fdimg.switch_program(ProgramName::SECOND_STAGE);
         fdimg.write_program_to_disk_image();
 
         fdimg.switch_program(ProgramName::FILESYSTEM);
         fdimg.write_program_to_disk_image();
 
-        fdimg.switch_program(ProgramName::SECOND_STAGE);
+        fdimg.switch_program(ProgramName::FS_WORKER);
         fdimg.write_program_to_disk_image();
 
         goto end;

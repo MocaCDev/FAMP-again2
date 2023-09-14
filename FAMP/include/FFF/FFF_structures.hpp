@@ -85,7 +85,7 @@ namespace FFF_Structures
 
     struct FAMP_PROTOCOL_SUBHEADING
     {
-        uint32          SubHeadingSig;
+        uint32          SubHeadingSig = 0x0;
         uint16          padding = 0x0000;
 
         uint32          ProgramSizeInBytes;
@@ -113,9 +113,40 @@ namespace FFF_Structures
 
     struct FAMP_PROTOCOL_MEMORY_STAMP
     {
-        uint16          MemID;
+        uint16          MemID = 0x0;
         uint8           MemIDSig[4] = {'F', 'E', 'N', 'D'};
         uint16          padding = 0x0000;
+    } __attribute__((packed));
+
+    struct FAMP_ASM_PROGRAM_HEADER
+    {
+        uint8           AsmProgramHeaderSig[4] = {'A', 'S', 'M', 0x0};
+        
+        /* Name of the assembly program. */
+        uint8           AsmProgramname[15];
+
+        /* If the program uses any real-mode functionality, this must be true.
+         * If the program, itself, is in real mode this must be true.
+         * */
+        bool            InRealMode;
+
+        /* If `InRealMode` is true, this, too, must be true.
+         * If the program is running in long mode (`UsesLongMode` = true) and uses real-mode
+         * functionality, this must be true.
+         * */
+        bool            UsesRealMode;
+
+        /* If the program is in long mode, this must be true.
+         * If `InRealMode` is true and the program uses long mode related functionality,
+         * this must be true.
+         * */
+        bool            UsesLongMode;
+
+        /* If the program jumps to a program that's in long mode, or returns to a programs
+         * that's in long mode, this must be true.
+         * */
+        bool            ReturnsToLongMode;
+        uint8           padding;
     } __attribute__((packed));
     
 }

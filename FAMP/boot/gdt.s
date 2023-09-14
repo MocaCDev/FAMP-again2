@@ -64,4 +64,4 @@ _init_pm:
     mov fs, ax
     mov gs, ax
 
-    jmp word 0x8:0x840D
+    jmp word 0x8:0xA000

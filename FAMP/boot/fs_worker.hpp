@@ -5,8 +5,9 @@
 #include <common.hpp>
 
 extern uint8 filesystem[];
-extern "C" void __load_gdt();
-extern "C" void _init_pm();
-extern "C" void next();
+
+extern "C" void enter_rmode();
+extern "C" void enter_pmode();
+extern "C" void rmode_print();
 
 #endif

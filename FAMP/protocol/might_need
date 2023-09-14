@@ -1,0 +1,123 @@
+For: read_disk.s
+use16
+
+;
+; Data for `read_disk`
+;
+sector_amount dw 0x0
+starting_sector db 0x0
+address dw 0x0
+
+
+
+global read_disk
+read_disk:
+
+    mov cx, 0x02
+    
+    add sp, cx
+    mov bp, sp
+    mov ax, [bp]
+    mov [sector_amount], ax
+
+    add sp, cx
+    mov bp, sp
+    mov ax, [bp]
+    mov [starting_sector], ax
+
+    mov ah, 0x02
+    mov al, [sector_amount]
+    mov ch, 0x00
+    mov cl, [starting_sector]
+    mov dh, 0x00
+    mov dl, 0x80
+    int 0x13
+    jc failed
+
+    sub sp, 4
+    mov bp, sp
+
+    ret
+
+.failed:
+    mov ah, 0x0E
+    mov al, 'E'
+    int 0x10
+
+    cli
+    hlt
+    jmp $
+
+For: enter_rmode.s
+[bits 16]
+
+ALIGN(4)
+PGDT:
+    dw GDTEnd - GDTNull - 1
+    dd GDTNull
+GDTNull:        dq 0                    ; --    0x00
+GDTPMCode:        dq 0xCF9A000000FFFF        ; PM    0x08
+GDTPMData:        dq 0xCF92000000FFFF        ; PM    0x10
+GDTPM16Code:    dq 0xF9A000000FFFF        ; PM16    0x18
+GDTPM16Data:    dq 0xF92000000FFFF        ; PM16    0x20
+GDTEnd:
+
+[global __cpu_mode_rm_to_pm]
+__cpu_mode_rm_to_pm:                    ; void __cpu_mode_rm_to_pm(uint32_t returnAddress)
+    cli
+    lgdt [PGDT]
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    jmp (GDTPMCode - GDTNull):.PM
+[bits 32]
+.PM:
+    mov ax, GDTPMData - GDTNull
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    pop dword [.Tmp]
+    pop dword [.Tmp]
+    jmp dword [.Tmp]
+.Tmp:
+    jmp 0x8:0x840D
+[bits 16]
+
+[bits 32]
+[global __cpu_mode_pm_to_rm]
+__cpu_mode_pm_to_rm:                    ; void __cpu_mode_pm_to_rm(uint32_t returnAddress)
+    cli
+    lgdt [PGDT]
+    jmp (GDTPM16Code - GDTNull):.PM16
+[bits 16]
+.PM16:
+    mov ax, GDTPM16Data - GDTNull
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+
+    mov eax, cr0
+    and eax, 0x7FFFFFFE
+    mov cr0, eax
+    jmp 0:.RM
+.RM:
+    mov ax, 0
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    sti
+
+    pop dword [.Tmp]
+    pop dword [.Tmp]
+    shl word [.Tmp + 2], 12
+    push word [.Tmp + 2]
+    push word [.Tmp]
+    ret
+.Tmp:    dd 0

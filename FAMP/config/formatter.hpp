@@ -28,8 +28,9 @@ namespace FileFormatter
         void format()
         {
             puint8 file_data = nullptr;
-            struct FAMP_PROTOCOL_SUBHEADING *subheading = nullptr;
-            struct FAMP_PROTOCOL_MEMORY_STAMP *mem_stamp = nullptr;
+            struct FAMP_PROTOCOL_SUBHEADING subheading;
+            struct FAMP_PROTOCOL_MEMORY_STAMP mem_stamp;
+
 
             /*
              * TODO: With the following variable, we need a way to know if a program
@@ -52,24 +53,17 @@ namespace FileFormatter
 
             const auto init_mem_stamp = [&mem_stamp] (uint16 mem_id)
             {
-                if(mem_stamp) delete mem_stamp;
-
-                mem_stamp = new struct FAMP_PROTOCOL_MEMORY_STAMP;
-                mem_stamp->MemID = mem_id;
+                mem_stamp.MemID = mem_id;
 
                 return;
             };
 
             const auto init_subheading = [&subheading, &is_asm_program] (uint32 psize_in_bytes, uint16 psize_in_sectors)
             {
-                if(subheading) delete subheading;
-
-                subheading = new struct FAMP_PROTOCOL_SUBHEADING;
-
-                subheading->SubHeadingSig = FAMP_SUBHEADER_SIGNATURE;
-                subheading->ProgramSizeInBytes = psize_in_bytes;
-                subheading->ProgramSizeInSectors = psize_in_sectors;
-                subheading->IsAsmProgram = is_asm_program;
+                subheading.SubHeadingSig = FAMP_SUBHEADER_SIGNATURE;
+                subheading.ProgramSizeInBytes = psize_in_bytes;
+                subheading.ProgramSizeInSectors = psize_in_sectors;
+                subheading.IsAsmProgram = is_asm_program;
 
                 return;
             };
@@ -116,8 +110,14 @@ namespace FileFormatter
                 while(bytes_needed % 512 != 0)
                     bytes_needed++;
                 
-                if(!(mem_stamp == nullptr))
-                    bytes_needed -= sizeof(*mem_stamp);
+                if(mem_stamp.MemID != 0x0)
+                    bytes_needed -= sizeof(mem_stamp);
+                
+                if(subheading.SubHeadingSig != 0x0)
+                    bytes_needed -= sizeof(subheading);
+
+                
+                printf("%d, %d\n", bytes_needed, file_size);
                 
                 uint8 padding[bytes_needed - file_size];
                 memset(padding, 0, bytes_needed - file_size);
@@ -128,12 +128,13 @@ namespace FileFormatter
 
                 {
                     open_file(filename, "wb");
-                    if(!(subheading == nullptr)) fwrite(subheading, 1, sizeof(*subheading), binary);
+                    if(subheading.SubHeadingSig != 0x0) fwrite(&subheading, 1, sizeof(subheading), binary);
                     fwrite(file_data, file_size, sizeof(*file_data), binary);
                     fwrite(&padding, bytes_needed - file_size, sizeof(uint8), binary);
-                    if(!(mem_stamp == nullptr)) fwrite(mem_stamp, 1, sizeof(*mem_stamp), binary);
+                    if(mem_stamp.MemID != 0x0) fwrite((const void *)&mem_stamp, 1, sizeof(mem_stamp), binary);
                     fclose(binary);
                 }
+
             };
 
             switch(file_tf)
@@ -153,7 +154,8 @@ namespace FileFormatter
                     pad_binary((cpint8) abs_kernel_bin_path, 0);
 
                     delete file_data;
-                    delete mem_stamp;
+
+                    mem_stamp.MemID = 0x0;
 
                     return;
                 }
@@ -166,8 +168,10 @@ namespace FileFormatter
                     pad_binary((cpint8) "../bin/second_stage.bin", 0);
                     
                     delete file_data;
-                    delete mem_stamp;
-                    delete subheading;
+                    //delete mem_stamp;
+                    
+                    subheading.SubHeadingSig = 0x0;
+                    mem_stamp.MemID = 0x0;
 
                     return;
                 }
@@ -179,8 +183,9 @@ namespace FileFormatter
                     pad_binary((cpint8) "../bin/mbr_part_table.bin", 1536);
                     
                     delete file_data;
-                    delete mem_stamp;
-                    
+
+                    mem_stamp.MemID = 0x0;
+
                     return;
                 }
                 case FileToFormat::FS_worker: {

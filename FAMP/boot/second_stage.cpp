@@ -2,23 +2,21 @@
 
 void __START main()
 {
-    if(filesystem[0] == 0x46)
-    {
-        //__asm__("mov ah, 0x0E\nmov al, 'T'\nint 0x10");
-    
-    //__load_gdt();
-    //_init_pm();
+    //__asm__(".code16gcc");
 
-        puint8 addr = (puint8) 0xB8000;
-        addr[0] = 'D';
-        addr[2] = 'I';
-        addr[4] = 'C';
-        addr[6] = 'K';
-    }
+    //__cpu_mode_pm_to_rm();
+    //enter_protected_mode();
 
     //__asm__ volatile("jmp 0x8:0x1000");
 
+    //puint8 addr = (puint8) 0xB8000;
+    //addr[0] = 'g';
     //next();
+
+    read_in_memory(0x0A00, 0x04, 0x02);
+
+    __load_gdt();
+    __asm__ volatile("jmp 0x8:0x1000");
 
     while(true);
 }

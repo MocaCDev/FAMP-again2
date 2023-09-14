@@ -8,9 +8,6 @@
 
 using namespace BootloaderStructs;
 
-extern "C" void __load_gdt();
-extern "C" void _init_pm();
-
 /*#include <FFF/FFF_structures.hpp>
 #include <FFS/FAMP_fs.hpp>
 #include <bootloader/bootloader_structures.hpp>

@@ -1,0 +1,22 @@
+For: config_files.hpp
+sprintf((pint8) completed_format, (cpint8) format,
+                        os_name, yod.type, yod.OS_version,
+                        yod.FS_type, yod.in_production,
+                        0x02 + (ssbin_size / 512),
+                        (ssbin_size / 512),
+                        //fbin_size / 512,
+                        //0x2 + (fbin_size / 512),
+                        starting_sector,//0x05 + (fbin_size / 512), //starting_sector,//0x2 + (fbin_size / 512) + 0x6,
+                        starting_sector + (fbin_size / 512),
+                        (fbin_size / 512),
+                        (starting_sector + (fbin_size / 512)),
+                        ((starting_sector + (fbin_size / 512)) + (fs_worker_bin_size / 512)),
+                        (fs_worker_bin_size / 512));
+                        //(fbin_size/512),
+                        //starting_sector,
+                        //starting_sector + (fs_worker_bin_size / 512),
+                        //(fs_worker_bin_size / 512));
+                        //(0x5 + (fbin_size / 512)) + 0x2,
+                        //0x2,
+                        //0x2 + (fbin_size / 512),
+                        //(fbin_size / 512));

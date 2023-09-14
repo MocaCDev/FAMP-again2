@@ -3,9 +3,9 @@
 #include "common.hpp"
 
 #define MBR_ADDRESS                         0x7C00
-#define MBR_PART_TABLE_PROGRAM_ADDRESS      0x7E00 /* Dwells right after MBR. */
-#define SECOND_STAGE_PROGRAM_ADDRESS        0x8400 /* Second-stage bootloader dwells right after the MBR partitition table program. The last program read the second stage bootloader into memory. */
-#define ABS_SECOND_STAGE_PROGRAM_ADDRESS    0x840D /* Absolute second stage address is the offset from the subheading as to where the actual program resides. */
+//#define MBR_PART_TABLE_PROGRAM_ADDRESS      0x7E00 /* Dwells right after MBR. */
+#define SECOND_STAGE_PROGRAM_ADDRESS        0x7E00 /* Second-stage bootloader dwells right after the MBR partitition table program. The last program read the second stage bootloader into memory. */
+#define ABS_SECOND_STAGE_PROGRAM_ADDRESS    0x7E0D /* Absolute second stage address is the offset from the subheading as to where the actual program resides. */
 #define FS_WORKER_PROGRAM_ADDRESS           0x1000
 #define FILESYSTEM_ADDRESS                  0xF000
 
