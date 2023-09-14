@@ -3,6 +3,12 @@
 
 using namespace YamlParser;
 
+/*
+ * The starting sector is 0x05 because the MBR part table program consists of only
+ * three sectors.
+ * */
+uint16 starting_sector     = 0x05;
+
 namespace ConfigFiles
 {
     cpint8 mbr_format = (cpint8) initiate_path((pint8)"formats/", (pint8)"mbr_format");
@@ -10,7 +16,9 @@ namespace ConfigFiles
     cpint8 user_makefile = (cpint8) initiate_path((pint8)"formats/", (pint8)"user_mf");
     cpint8 old_mf = (cpint8) initiate_path((pint8)"formats/", (pint8)"old_mf");
     cpint8 fs_bin = (cpint8) initiate_path((pint8)"../bin/", (pint8)"fs.bin");
-    
+    cpint8 fs_worker_bin = (cpint8) initiate_path((pint8) "../bin/", (pint8)"fs_worker.bin");
+    cpint8 second_stage_bin = (cpint8) initiate_path((pint8) "../bin/", (pint8)"second_stage.bin");
+
     enum class FileToConfigure: uint8_t
     {
         UserMakefile,
@@ -182,6 +190,16 @@ namespace ConfigFiles
                     open_file(fs_bin, "rb");
                     size_t fbin_size = get_file_size();
                     fclose(fbin);
+                    starting_sector += fbin_size / 512;
+
+                    open_file(second_stage_bin, "rb");
+                    size_t ssbin_size = get_file_size();
+                    fclose(fbin);
+                    starting_sector += (ssbin_size / 512) + 1;
+
+                    open_file(fs_worker_bin, "rb");
+                    size_t fs_worker_bin_size = get_file_size();
+                    fclose(fbin);
 
                     uint8 os_name[14];
                     memset(os_name, ' ', 14);
@@ -191,13 +209,19 @@ namespace ConfigFiles
                     sprintf((pint8) completed_format, (cpint8) format,
                         os_name, yod.type, yod.OS_version,
                         yod.FS_type, yod.in_production,
+                        0x08 + ((ssbin_size / 512) + 1),
+                        ((ssbin_size / 512) + 1),
+                        //fbin_size / 512,
                         //0x2 + (fbin_size / 512),
-                        0x2 + (fbin_size / 512) + 0x2,
-                        (0x2 + (fbin_size / 512) + 0x2) + (fbin_size/512),
+                        0x05 + (fbin_size / 512), //starting_sector,//0x2 + (fbin_size / 512) + 0x6,
+                        (fbin_size/512),
+                        starting_sector,
+                        starting_sector + (fs_worker_bin_size / 512),
+                        (fs_worker_bin_size / 512));
                         //(0x5 + (fbin_size / 512)) + 0x2,
                         //0x2,
                         //0x2 + (fbin_size / 512),
-                        (fbin_size / 512));
+                        //(fbin_size / 512));
 
                     goto write;
                 }

@@ -106,7 +106,6 @@ pint8 initiate_path(int8 data1[], int8 data2[])
 
 	return array;
 }
-
 #endif
 
 #ifdef OS_RELATED
@@ -114,6 +113,19 @@ pint8 initiate_path(int8 data1[], int8 data2[])
 
 #ifndef BIT32_PROGRAM
 asm(".code16gcc");
+
+void read_in_memory(uint16 addr, uint8 start_sector, uint8 sector_amount)
+{
+    uint16 a = (0x02 << 8) | sector_amount;
+
+    /* Read from disk. This will be replaced when ATA PIO support is added. */
+    __asm__("mov ax, %0" : : "dN"((uint16)addr));
+    __asm__("mov es, ax\nxor bx, bx\nmov ax, %0" : : "d"((uint16) a));
+    __asm__("mov ch, 0x00\nmov cl, %0" : : "dN"((uint8) start_sector));
+    __asm__("mov dh, 0x00\nmov dl, 0x80\nint 0x13");
+
+    return;
+}
 #endif
 #endif
 

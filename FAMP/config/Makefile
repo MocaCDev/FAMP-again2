@@ -7,6 +7,7 @@
 .PHONY: format_fs
 .PHONY: format_mbr_part_table
 .PHONY: disk_image
+.PHONY: format_fs_worker
 
 FLAGS = -fsanitize=leak -std=c++20 -Wall
 
@@ -39,3 +40,6 @@ format_mbr_part_table:
 
 disk_image:
 	../bin/config.o disk_image
+
+format_fs_worker:
+	../bin/config.o ffs_worker

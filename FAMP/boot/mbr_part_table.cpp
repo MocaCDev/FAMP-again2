@@ -10,6 +10,7 @@ void __START main()
     //MBR_ptr_addr += sizeof(*heading);
 
     /* MBR "entry" code outline. */
+    struct partition_entry *pentry;
     //*entry_code = *(struct MBR_bin_outline *) MBR_ptr_addr;
     
     /* MBR partition table entries. */
@@ -24,7 +25,14 @@ void __START main()
 
     //__asm__("jmp 0x0:0x7E0D");
 
-    __asm__("mov ah, 0x0E\nmov al, 'D'\nint 0x10");
+    pentry = (struct partition_entry *) (FIRST_ENTRY);
+    read_in_memory(SECOND_STAGE_PROGRAM_ADDRESS / 16, pentry->starting_sector, pentry->sector_amnt);
+
+    //pentry = (struct partition_entry *) (THIRD_ENTRY);
+    //read_in_memory(FS_WORKER_PROGRAM_ADDRESS / 16, pentry->starting_sector, pentry->sector_amnt);
+    
+    __load_gdt();
+    //_init_pm();
 
     while(true);
 }

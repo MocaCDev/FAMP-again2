@@ -2,6 +2,15 @@
 #define FAMP_PROTOCOL_MBR_PART_TABLE_H
 #define OS_RELATED
 #include <common.hpp>
+#define NEED_MBR_PART_TABLE_ENTRY_ADDRESSES
+#include <addresses.hpp>
+#include <bootloader/bootloader_structures.hpp>
+
+using namespace BootloaderStructs;
+
+extern "C" void __load_gdt();
+extern "C" void _init_pm();
+
 /*#include <FFF/FFF_structures.hpp>
 #include <FFS/FAMP_fs.hpp>
 #include <bootloader/bootloader_structures.hpp>

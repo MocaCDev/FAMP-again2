@@ -32,10 +32,12 @@ uint32 FAMP_SUBHEADER_SIGNATURE           = (uint32) 0x46534844;       /* FSHD *
 #define FAMP_MBR_PTBL_ENTRIES_ID      0xF2F2
 
 /* Memory stamp information. */
-#define FAMP_MEM_STAMP_PTBLE_P        0x10F0          /* PTBLE_P - Partition Table Program ID */
-#define FAMP_MEM_STAMP_SECOND_STAGE   0x20F0
-#define FAMP_MEM_STAMP_FS_WORKER      0x30F0
-#define FAMP_MEM_STAMP_FEND_SIG       0x46454E44
+#define FAMP_MEM_STAMP_PTBLE_P        (uint16) 0xF110          /* PTBLE_P - Partition Table Program ID */
+#define FAMP_MEM_STAMP_SECOND_STAGE   (uint16) 0xF210
+#define FAMP_MEM_STAMP_FS_WORKER      (uint16) 0xF310
+#define FAMP_MEM_STAMP_KERNEL         (uint16) 0xF410
+#define FAMP_MEM_STAMP_MBR_PTBL       (uint16) 0xF510
+#define FAMP_MEM_STAMP_FEND_SIG       (uint32) 0x46454E44
 
 namespace FFF_Structures
 {
@@ -84,7 +86,7 @@ namespace FFF_Structures
     struct FAMP_PROTOCOL_SUBHEADING
     {
         uint32          SubHeadingSig;
-        uint16          padding;
+        uint16          padding = 0x0000;
 
         uint32          ProgramSizeInBytes;
         uint16          ProgramSizeInSectors;

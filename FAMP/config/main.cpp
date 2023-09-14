@@ -53,6 +53,14 @@ int main(int args, char *argv[])
 
         goto end;
     }
+    
+    if(strcmp((pint8) argv[1], "ffs_worker") == 0)
+    {
+        Formatter f(FileToFormat::FS_worker);
+        f.format();
+
+        goto end;
+    }
 
     if(strcmp((pint8) argv[1], "format_fs") == 0)
     {
@@ -68,6 +76,12 @@ int main(int args, char *argv[])
         fdimg.write_program_to_disk_image();
 
         fdimg.switch_program(ProgramName::MBR_PART_TABLE_PROGRAM);
+        fdimg.write_program_to_disk_image();
+
+        fdimg.switch_program(ProgramName::FILESYSTEM);
+        fdimg.write_program_to_disk_image();
+
+        fdimg.switch_program(ProgramName::SECOND_STAGE);
         fdimg.write_program_to_disk_image();
 
         goto end;

@@ -15,8 +15,8 @@ FAMP_spec_MBR_header:
 	.in_production				db 0x%X
     .end                        db 'EE', 0x0, 0x0
 
-%%define FS_STARTING_SECTOR		byte [0x7DD9]	; mbr_partition_entry.starting_sector_and_cylinder
-%%define FS_SECTOR_AMMOUNT		byte [0x7DCF]	; mbr_partition_entry.sector_amnt
+%%define FS_SECTOR_AMMOUNT		byte [0x7DD9]	; mbr_partition_entry.starting_sector_and_cylinder
+%%define FS_STARTING_SECTOR		byte [0x7DCF]	; mbr_partition_entry.sector_amnt
 
 struc mbr_partition_table_entry
 	; Is this MBR partition table entry bootable?(is it describing the rest of the bootloader?)
@@ -107,6 +107,19 @@ start:
 	int 0x13
 	jc failed
 
+	xor ax, ax
+	mov es, ax
+	mov bx, 0xF000
+
+	mov ah, 0x02
+	mov al, FS_SECTOR_AMMOUNT
+	mov ch, 0x00
+	mov cl, FS_STARTING_SECTOR
+	mov dh, 0x00
+	mov dl, 0x80
+	int 0x13
+	jc failed
+
 	;xor ax, ax
 	;mov es, ax
 	;mov bx, 0x0700
@@ -145,13 +158,15 @@ FAMP_spec_MBR_ptbl_entries:
     .id_name    db 'FMPT', 0x0, 0x0
 
 ; Second stage bootloader(0x0E = second-stage bootloader)
-CreateEntry 1, 0x80, 0x05, 0x0E, 1, 0x07, 0x2
+CreateEntry 1, 0x80, 0x08, 0x0E, 1, 0x%X, 0x%X
 
 ; FS(0x0C = FileSystem)
-CreateEntry	2, 0x00, 0x0%X, 0x0C, 1, 0x%X, 0x%X
+CreateEntry	2, 0x00, 0x05, 0x0C, 1, 0x%X, 0x%X
 
-; Unused
-CreateEntry	3, 0x00, 0x00, 0x01, 0, 0x00, 0x00
+; FS Worker(0x0D = FileSystem Worker)
+; Might not need:
+;	The second stage bootloader might be in charge of the rest of things.
+CreateEntry	3, 0x00, 0x0%X, 0x0D, 0, 0x0%X, 0x%X
 
 ; Unused
 CreateEntry	4, 0x00, 0x00, 0x01, 0, 0x00, 0x00
