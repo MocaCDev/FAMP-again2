@@ -5,12 +5,22 @@
 ;
 %define FIRST_ENTRY_START_SECTOR		byte [0x7DBF]	; mbr_partition_entry.sector_amnt
 %define FIRST_ENTRY_SECTOR_AMOUNT		byte [0x7DC9]	; mbr_partition_entry.starting_sector_and_cylinder
+%define FIRST_ENTRY_TYPE                byte [0x7DC1]   ; mbr_partition_entry.entry_type
 
 %define SECOND_ENTRY_START_SECTOR       byte [0x7DCF]
 %define SECOND_ENTRY_SECTOR_AMOUNT      byte [0x7DD9]
+%define SECOND_ENTRY_TYPE               byte [0x7DD1]
 
 %define THIRD_ENTRY_START_SECTOR        byte [0x7DDF]
 %define THIRD_ENTRY_SECTOR_AMOUNT       byte [0x7DE9]
+%define THIRD_ENTRY_TYPE                byte [0x7DE1]
+
+;
+; All of the entry types that `entry_type` can be
+;
+%define ENTRY_TYPE_SECOND_STAGE         0x0E
+%define ENTRY_TYPE_FS                   0x0C
+%define ENTRY_TYPE_FS_WORKER            0x0D
 
 ; The fourth entry doesn't matter. We know there is nothing there so.
 

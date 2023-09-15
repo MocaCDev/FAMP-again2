@@ -48,6 +48,11 @@ rmode_print:
 
     ret
 
+;
+; TODO: This function will have to take an argument so it knows what real-mode function to call.
+;       `enter_rmode` will be an assembly stub used by C/C++ programs that are running in 32-bit mode.
+;       The stub will allow the program to enter real mode, perform a task then quickly get back to 32-bit mode.
+;
 global enter_rmode
 use32
 enter_rmode:

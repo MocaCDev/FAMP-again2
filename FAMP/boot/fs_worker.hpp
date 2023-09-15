@@ -3,6 +3,9 @@
 #define OS_RELATED
 #define BIT32_PROGRAM
 #include <common.hpp>
+#include <FFS/FAMP_fs.hpp>
+
+using namespace FAMP_FS;
 
 extern uint8 filesystem[];
 

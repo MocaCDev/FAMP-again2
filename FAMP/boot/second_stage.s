@@ -1,6 +1,7 @@
 [org 0x7E00]
 use16
 
+start:
 ;
 ; Per the current revision of FAMPs spec, if `IsAsmProgram` is true (1)
 ; there needs to be a assembly program header that follows directly after the
@@ -26,7 +27,7 @@ FAMP_PROTOCOL_SUBHEADING:
 ; to a program that is in long mode, `ReturnsToLongMode` must be true (1).
 ;
 FAMP_PROTOCOL_ASM_PROGRAM_HEADING:
-    .AsmProgramHeaderSig    db 'ASM`, 0x0
+    .AsmProgramHeaderSig    db 'ASM', 0x0
     .AsmProgramName         db 'SecondStage    '
     .InRealMode             db 1
     .UsesRealMode           db 1
@@ -38,7 +39,24 @@ mov ah, 0x00
 mov al, 0x02
 int 0x10
 
-%include "protocol/bootloader/mbr_part_table.s"
+%define need_mbr_part_table_access
+%include "protocol/protocol_util.s"
+
+;
+; Make sure the `entry_type`s are as they should be for each of the three
+; MBR partition table entries.
+;
+mov ah, FIRST_ENTRY_TYPE
+cmp ah, ENTRY_TYPE_SECOND_STAGE
+jne failed
+
+mov ah, SECOND_ENTRY_TYPE
+cmp ah, ENTRY_TYPE_FS
+jne failed
+
+mov ah, THIRD_ENTRY_TYPE
+cmp ah, ENTRY_TYPE_FS_WORKER
+jne failed
 
 ;
 ; Reading in the FileSystem (FS).

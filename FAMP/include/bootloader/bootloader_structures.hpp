@@ -2,9 +2,10 @@
 #define FAMP_PROTOCOL_BOOTLOADER_STRUCTURES_H
 #include "common.hpp"
 
-#define ENTRY_TYPE_SECOND_STAGE       0x0E
-#define ENTRY_TYPE_FS                 0x0C
-#define ENTRY_TYPE_FS_WORKER          0x0D
+/* TODO: Do we need these? We also define them in `protocol/bootloader/mbr_part_table.s`. */
+//#define ENTRY_TYPE_SECOND_STAGE       0x0E
+//#define ENTRY_TYPE_FS                 0x0C
+//#define ENTRY_TYPE_FS_WORKER          0x0D
 
 namespace BootloaderStructs
 {

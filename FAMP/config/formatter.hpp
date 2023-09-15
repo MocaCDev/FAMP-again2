@@ -115,9 +115,6 @@ namespace FileFormatter
                 
                 if(subheading.SubHeadingSig != 0x0)
                     bytes_needed -= sizeof(subheading);
-
-                
-                printf("%d, %d\n", bytes_needed, file_size);
                 
                 uint8 padding[bytes_needed - file_size];
                 memset(padding, 0, bytes_needed - file_size);
@@ -168,8 +165,6 @@ namespace FileFormatter
                     pad_binary((cpint8) "../bin/second_stage.bin", 0);
                     
                     delete file_data;
-                    //delete mem_stamp;
-                    
                     subheading.SubHeadingSig = 0x0;
                     mem_stamp.MemID = 0x0;
 
@@ -183,16 +178,18 @@ namespace FileFormatter
                     pad_binary((cpint8) "../bin/mbr_part_table.bin", 1536);
                     
                     delete file_data;
-
                     mem_stamp.MemID = 0x0;
 
                     return;
                 }
                 case FileToFormat::FS_worker: {
                     open_file((cpint8) "../bin/fs_worker.bin", "rb");
+
+                    init_mem_stamp(FAMP_MEM_STAMP_FS_WORKER);
                     pad_binary((cpint8) "../bin/fs_worker.bin", 1024);
 
                     delete file_data;
+                    mem_stamp.MemID = 0x0;
                     
                     return;
                 }
