@@ -5,12 +5,13 @@ FAMP_FS_HEADER:
     .FampFS_Sig db      'FAMPFS'
     .FampFS_Rev dw      0x0001
     .FampFS_NOP dw      0x01
-    .padding            times 0xF9 dw 0x0
+    .FampFS_NOF dd      0x0
+    .padding            times 0xF6 dw 0x0
     .FampFS_BeginSig dd 0x47425346
 
 FAMP_FS_PARTITION_METADA:
     .PartitionName db       'KERNEL'
-    .padding                times (0x100 - 6) db 0x0
+    .padding                times (0x100 - 0x2) db 0x0
     .PartitionAcc db        0xD0 ; Protocol Only
     .PartitionAct db        0xF2 ; Nothing
     .PartitionAddress dd    0x80000000
@@ -27,7 +28,7 @@ FAMP_FS_PARTITION_METADA:
     .WillReturn db          0x0 ; False
     .OriginalAddress dd     0x0
     .RelocateAcc db         0x0 ; No relocation action
-    .padding2               times 0xD9 db 0x0 ; 0xD9 = ((512 - 0x100) - 35) db 0x0
+    .padding2               times 0xD9 db 0x0 ; 0xD9 = 0x100 - 35 = ((512 - 0x100) - 35)
     .PartitionBeginSig db   'PBEG'
 
 incbin "../bin/kernel.bin"

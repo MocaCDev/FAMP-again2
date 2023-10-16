@@ -77,6 +77,27 @@ namespace FFF_Structures
 
         FAMP_PROTOCOL_DISK_IMAGE_HEADING() = default;
         ~FAMP_PROTOCOL_DISK_IMAGE_HEADING() = default;
+
+        #ifdef OS_RELATED
+        void finalize_disk_image_heading()
+        {
+            if(HeaderSig != FAMP_HEADER_START_SIGNATURE)
+                HeaderSig = revert_value<uint32>(HeaderSig);
+
+            if(HeaderEnd != FAMP_HEADER_END_SIGNATURE)
+                HeaderEnd = revert_value<uint16>(HeaderEnd);
+        }
+
+        bool disk_image_is_good()
+        {
+            if(HeaderSig == FAMP_HEADER_START_SIGNATURE &&
+               HeaderEnd == FAMP_HEADER_END_SIGNATURE &&
+               ProtocolRevision == FAMP_CURRENT_REVISION) return true;
+            
+            return false;
+        }
+        #endif
+
     #ifdef OS_RELATED
     } __attribute__((packed));
     #else

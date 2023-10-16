@@ -23,8 +23,9 @@ namespace FAMP_FS
         uint8       FampFS_Sig[6];      /* "FAMPFS" */
         uint16      FampFS_Rev;         /* Should always be equal to `FAMP_FS_REVISION`. */
         uint16      FampFS_NOP;         /* NOP - Number Of Partitions; this is the number of partitions that the FileSystem consists of. */
-
-        uint16      padding[0xF9];
+        uint32      FampFS_NOF;         /* NOF - Number Of Folders (zero by default). */
+        
+        uint16      padding[0xF1];
         uint32      FampFS_BeginSig;    /* "FSBG" */
 
         FAMP_FS_HEADER() = default;

@@ -23,7 +23,6 @@
 
 %endmacro
 
-global enter_protected_mode
 %macro enter_protected_mode 0
     cli
 
@@ -36,6 +35,8 @@ global enter_protected_mode
     mov ax, 0x10
     mov ds, ax
     mov ss, ax
+    mov fs, ax
+    mov gs, ax
 
 %endmacro
 
@@ -62,9 +63,27 @@ enter_rmode:
 
     ret
 
+global enter_rmode_and_stay
+use32
+enter_rmode_and_stay:
+    __x86_EnterRealMode
+
+    ret
+
+global enter_rmode_and_hlt
+use32
+enter_rmode_and_hlt:
+    __x86_EnterRealMode
+
+    cli
+    hlt
+    jmp $
+
+tes equ 0x1000
+
 global enter_pmode
 use16
 enter_pmode:
     enter_protected_mode
-
+    
     ret

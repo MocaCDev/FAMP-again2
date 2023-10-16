@@ -4,13 +4,15 @@
 #define BIT32_PROGRAM
 #include <common.hpp>
 #include <FFS/FAMP_fs.hpp>
+/* This program is, technically, still part of FAMPs "bootloader". */
+#include <bootloader/rmode_functions.hpp>
+#include <bootloader/bootloader_structures.hpp>
+#include <FFF/FFF_structures.hpp>
 
+using namespace FFF_Structures;
+using namespace BootloaderStructs;
 using namespace FAMP_FS;
 
 extern uint8 filesystem[];
-
-extern "C" void enter_rmode();
-extern "C" void enter_pmode();
-extern "C" void rmode_print();
 
 #endif

@@ -1,8 +1,13 @@
 #include "main.hpp"
 
+short a(short b)
+{
+    printf("%X\n", (b & 0xFFFF));//(((b & 0x00FF) << 8) + ((b & 0xFF00) >> 8)));
+    return b;
+}
+
 int main(int args, char *argv[])
 {
-
     if(strcmp((pint8) argv[1], "nm") == 0)
     {
         ConfigureFiles cf(FileToConfigure::ProtocolMakefile);

@@ -5,7 +5,7 @@
 
 void __START main()
 {
-    //*heading = *(struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *) FAMP_DISK_IMAGE_HDR_ADDR;
+    static struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *heading = (struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *) FAMP_DISK_IMAGE_HDR_ADDR;
     //heading->HeaderSig = revert_value<uint32> (heading->HeaderSig);
     //MBR_ptr_addr += sizeof(*heading);
 

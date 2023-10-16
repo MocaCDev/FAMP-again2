@@ -7,6 +7,13 @@
 //#define ENTRY_TYPE_FS                 0x0C
 //#define ENTRY_TYPE_FS_WORKER          0x0D
 
+#ifdef OS_RELATED
+#include "addresses.hpp"
+
+#define FAMP_DISK_IMAGE_HDR_OFFSET      0x05    /* There is a `jmp` instruction at the beginning of the MBR. */
+#define FAMP_DISK_IMAGE_HDR_ADDR        (MBR_ADDRESS + FAMP_DISK_IMAGE_HDR_OFFSET)
+#endif
+
 namespace BootloaderStructs
 {
     struct partition_entry

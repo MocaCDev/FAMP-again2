@@ -108,6 +108,92 @@ pint8 initiate_path(int8 data1[], int8 data2[])
 }
 #endif
 
+/* `int8_make_abs` - get rid of the six `F`s at the beginning of the signed value.
+ *
+ * Example: lets say we have `char a = 0xAB`. Its value will be represented as `FFFFFFAB`.
+ * 			`int8_make_abs` will take `FFFFFFAB` and get `AB` and disregard the `F`s.
+ * */
+#define int8_make_abs(int8_val)			(uint8)(int8_val & 0xFF)
+
+/* `int16_make_abs` - get rid of the four `F`s at the beginning of the signed value.
+ *
+ * Example: lets say we have `short a = 0xABCD`. Its value will be represented as `FFFFABCD`.
+ *			`int16_make_abs` will take `FFFFABCD` and get `ABCD` and disregard the `F`s.
+ * */
+#define int16_make_abs(int16_val)		(uint16)(int16_val & 0xFFFF)
+
+/* `make_absolute` implies the same exact functionality as the above macros, except it supports integers. */
+template<typename T, typename R>
+#ifndef OS_RELATED
+	requires (std::is_same<T, int8>::value
+		|| std::is_same<T, int16>::value
+		|| std::is_same<T, int32>::value /* Not needed, but I went ahead and added this because why not. */)
+		&& (std::is_same<R, uint8>::value
+		||	std::is_same<R, uint16>::value
+		||	std::is_same<R, uint32>::value /* Again, not needed but I went ahead and added this because why not. */)
+#endif
+#ifndef OS_RELATED
+R make_absolute(T &value)
+#else
+R make_absolute(T value)
+#endif
+{
+	/* Some type checking first just to be safe. */
+	if(sizeof(T) != sizeof(R))
+		return (T) value;
+	
+	switch(sizeof(T))
+	{
+		case 1: return (R) value & 0xFF;break;
+		case 2: return (R) value & 0xFFFF;break;
+		case 4: return (R) value & 0xFFFFFFFF;break;
+		default: break;
+	}
+
+	return (R) value;
+}
+
+template<typename T>
+#ifndef OS_RELATED
+    requires (std::is_same<T, uint16>::value
+		|| std::is_same<T, int16>::value
+        || std::is_same<T, uint32>::value
+		|| std::is_same<T, int32>::value)
+        && (!std::is_same<T, uint8>::value)
+#endif
+#ifndef OS_RELATED
+T revert_value(T &value)
+#else
+T revert_value(T value)
+#endif
+{
+    #ifdef OS_RELATED
+    if(sizeof(T) == 1) return (T) value & 0xFF;
+    #endif
+
+    T old_value = value;
+    value ^= value;
+
+    switch(sizeof(T))
+    {
+        case 2: {
+            value |= (value << 0) | ((old_value >> 0) & 0xFF);
+            value = (value << 8) | ((old_value >> 8) & 0xFF);
+            break;
+        }
+        case 4: {
+            value |= (value << 0) | ((old_value >> 0) & 0xFF);
+            value = (value << 8) | ((old_value >> 8) & 0xFF);
+            value = (value << 8) | ((old_value >> 16) & 0xFF);
+            value = (value << 8) | ((old_value >> 24) & 0xFF);
+            break;
+        }
+        default: break;
+    }
+
+    return (T) value;
+}
+
 #ifdef OS_RELATED
 #define __START __attribute__((section("__start")))
 
@@ -127,6 +213,37 @@ void read_in_memory(uint16 addr, uint8 start_sector, uint8 sector_amount)
     return;
 }
 #endif
+
+#ifdef BIT32_PROGRAM
+/*
+ *  __inp: back-end function
+ *
+ *  Read-in a value from a port
+ *
+ *  Input: uint16 port
+ *  Output: uint8 rv(return-value from the port)
+ *  On Error: This function does not error
+ */
+uint8 __inp(uint16 port) {
+    uint8 rv;
+    
+    __asm__ __volatile__("in %0, %1": "=a"(rv): "dN"(port));
+    return rv;
+}
+/*
+ *  __outp: back-end function
+ *
+ *  Write a value to a port
+ *
+ *  Input: uint16 port, uint8 data
+ *  Output: None
+ *  On Error: This function does not error
+ */
+void __outp(uint16 port, uint8 data) {
+    __asm__ __volatile__("outb %0, %1":: "dN"(port), "a"(data));
+}
+#endif
+
 #endif
 
 #endif
