@@ -14,5 +14,8 @@ using namespace BootloaderStructs;
 using namespace FAMP_FS;
 
 extern uint8 filesystem[];
+extern uint8 error_control_addr[];
+extern uint8 kernel_virtual_address[];
+uint8 *fs_addr = filesystem;
 
 #endif

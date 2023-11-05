@@ -15,7 +15,8 @@
  * */
 #define FAMP_HEADER_START_SIGNATURE             0x46414D50      /* FAMP */
 #define FAMP_HEADER_END_SIGNATURE               0x4545          /* EE */
-#define FAMP_CURRENT_REVISION                   0x00001000
+#define FAMP_CURRENT_MJR_REVISION               0x01
+#define FAMP_CURRENT_MNR_REVISION               0x01
 #define FAMP_MAX_USED_ENTRIES                   0x04
 
 /* Sub heading header information. 
@@ -61,10 +62,11 @@ namespace FFF_Structures
      * */
     enum DiskImageHeadingErrorCodes
     {
-        AllGood             = 0x0,
-        BadHeaderSig        = 0x1,
-        UnknownProtocolRev  = 0x2,
-        BadHeaderEndSig     = 0x3
+        AllGood             = 0x00,
+        BadHeaderSig        = 0x01,
+        InvalidMjrRev       = 0x02,
+        InvalidMnrRev       = 0x03,
+        BadHeaderEndSig     = 0x04
     };
 
     struct FAMP_PROTOCOL_DISK_IMAGE_HEADING
@@ -72,7 +74,9 @@ namespace FFF_Structures
         uint32          HeaderSig;
         uint16          padding1;
 
-        uint16          ProtocolRevision;
+        //uint16          ProtocolRevision;
+        uint8           ProtocolMnrRevision;
+        uint8           ProtocolMjrRevision;
         uint16          padding2;
 
         uint8           UsedEntries;
@@ -81,6 +85,7 @@ namespace FFF_Structures
         uint8           os_name[15];
         uint8           os_type;
         uint8           os_version[6];
+        uint8           os_vid_mode;
         uint8           filesystem_type;
         bool            in_production;
 
@@ -100,18 +105,22 @@ namespace FFF_Structures
                 HeaderEnd = revert_value<uint16>(HeaderEnd);
         }
 
-        enum DiskImageHeadingErrorCodes disk_image_is_good()
+        void check_disk_image_heading(uint8 *err_ctrl_addr)
         {
             if(!(HeaderSig == FAMP_HEADER_START_SIGNATURE))
-                return BadHeaderSig;
+                enter_rmode_and_raise_err(BadHeaderSig);
             
             if(!(HeaderEnd == FAMP_HEADER_END_SIGNATURE))
-                return BadHeaderEndSig;
+                enter_rmode_and_raise_err(BadHeaderEndSig);
             
-            if(!(ProtocolRevision == FAMP_CURRENT_REVISION))
-                return UnknownProtocolRev;
+            if(!(ProtocolMjrRevision == FAMP_CURRENT_MJR_REVISION))
+                enter_rmode_and_raise_err(InvalidMjrRev);
             
-            return AllGood;
+            if(!(ProtocolMnrRevision == FAMP_CURRENT_MNR_REVISION))
+                enter_rmode_and_raise_err(InvalidMnrRev);
+            
+            if(err_ctrl_addr[0] == true)
+                enter_rmode_and_hlt();
         }
         #endif
 

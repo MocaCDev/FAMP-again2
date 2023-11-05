@@ -102,6 +102,19 @@ private:
 
         while(yaml_file_data->next != nullptr)
         {
+            if(yaml_file_data->yod_test((cpint8)"pref_vid_mode", true))
+            {
+                if(strcmp((cpint8) yaml_file_data->vdata_as_string, "vesa") == 0)
+                {
+                    yod.OS_vid_mode = 'v';
+
+                    goto cont;
+                }
+
+                yod.OS_vid_mode = 'b';
+
+                goto cont;
+            }
             if(yaml_file_data->yod_test((cpint8) "os_type", true))
             {
                 if(strcmp((cpint8) yaml_file_data->vdata_as_string, "bit32") == 0)

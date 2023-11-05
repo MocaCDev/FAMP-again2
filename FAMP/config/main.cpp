@@ -40,6 +40,9 @@ int main(int args, char *argv[])
         Formatter f(FileToFormat::Kernel);
         f.format();
 
+        ConfigureFiles cf(FileToConfigure::KernelLinker);
+        cf.write_file();
+
         goto end;
     }
 

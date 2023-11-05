@@ -87,10 +87,17 @@ call read_disk
 ; Load the GDT and go to the program that relocates the FileSystem (FS) and kernel
 call __load_gdt
 
+times 200 - ($ - $$) db 0x0
+
+call enter_pmode
+use32
+jmp word 0x8:0x80000000
+
 jmp $
 
 %include "boot/gdt.s"
 %include "protocol/bootloader/read_disk.s"
+%include "protocol/enter_rmode.s"
 
 failed:
     mov ah, 0x0E
@@ -101,7 +108,7 @@ failed:
     hlt
     jmp $
 
-times (1024 - 8) - ($ - $$) db 0x0
+times (1536 - 8) - ($ - $$) db 0x0
 
 FAMP_PROTOCOL_MEMORY_STAMP:
     .MemID      dw 0xF210

@@ -25,11 +25,22 @@ namespace FAMP_FS
         uint16      FampFS_NOP;         /* NOP - Number Of Partitions; this is the number of partitions that the FileSystem consists of. */
         uint32      FampFS_NOF;         /* NOF - Number Of Folders (zero by default). */
         
-        uint16      padding[0xF1];
+        uint16      padding[0xF6];
         uint32      FampFS_BeginSig;    /* "FSBG" */
 
         FAMP_FS_HEADER() = default;
         ~FAMP_FS_HEADER() = default;
+
+        #ifdef OS_RELATED
+        void finalize_fs_header()
+        {
+            if(FampFS_Rev != FAMP_FS_REVISION)
+                FampFS_Rev = revert_value<uint16>(FampFS_Rev);
+            
+            if(FampFS_BeginSig != FAMP_FS_BEGIN_SIG)
+                FampFS_BeginSig = revert_value<uint32>(FampFS_BeginSig);
+        }
+        #endif
     } __attribute__((packed));
 
     /* Partition access.
@@ -120,8 +131,20 @@ namespace FAMP_FS
         uint32      OriginalAddress;
         uint8       RelocateAcc;            /* RelocateAcc = RelocateAction; if `WillReturn` is true, this will be kept track of to see if it changed to `RelocateBack`, else it will be set to `RelocateAndStay`. */
 
-        uint8       Padding[0x175];
+        uint8       Padding[0x177];
         uint32      PartitionBeginSig;      /* "PBEG". */
+
+        FAMP_FS_PARTITION_METADATA() = default;
+        ~FAMP_FS_PARTITION_METADATA() = default;
+
+        #ifdef OS_RELATED
+        void finalize_partition_metadata()
+        {
+            /* Per the current revision of FAMP FS, this is the only thing we have to check. */
+            if(PartitionBeginSig != FAMP_FS_PARTITION_BEGIN_SIG)
+                PartitionBeginSig = revert_value<uint32>(PartitionBeginSig);
+        }
+        #endif
     } __attribute__((packed));
 }
 

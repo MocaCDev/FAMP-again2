@@ -24,16 +24,18 @@
 %endmacro
 
 %macro enter_protected_mode 0
+
     cli
 
     mov eax, cr0
     or al, 1
     mov cr0, eax
-    jmp dword 0x08:.pmode
+    jmp word 0x08:.pmode
 .pmode:
     use32
     mov ax, 0x10
     mov ds, ax
+    mov es, ax
     mov ss, ax
     mov fs, ax
     mov gs, ax
@@ -81,20 +83,27 @@ enter_rmode_and_stay:
 ;
 %define AllGood                         0x0000
 %define bad_disk_image_header_sig       0x0001
-%define unknown_protocol_revision       0x0002
-%define bad_disk_image_end_sig          0x0003
+%define invalid_mjr_revision            0x0002
+%define invalid_mnr_revision            0x0003
+%define bad_disk_image_end_sig          0x0004
 
 ;
 ; All error messages for the above error codes.
 ;
-bad_disk_image_header_sig_err_msg:  db 'The disk image heading signature is invalid (Error Code: 0x0001)', 0x0
-unknown_protocol_revision_err_msg:  db 'The disk image heading protocol revision is invalid (Error Code: 0x0002)', 0x0
-bad_disk_image_end_sig_err_msg:     db 'The disk image heading ending signature is invalid (Error Code: 0x0003)', 0x0
-unknown_err_msg: db 'An unknown error has occurred', 0x0
+bad_disk_image_header_sig_err_msg:  db 'The disk image heading signature is invalid', 0xD, 0xA, '    (Error Code: 0x0001)', 0xD, 0xA, 0x0
+invalid_mjr_revision_err_msg:       db 'The disk image heading protocol major revision is invalid', 0xD, 0xA, '    (Error Code: 0x0002)', 0xD, 0xA, 0x0
+invalid_mnr_revision_err_msg:       db 'The disk image heading protocol minor revision is invalid', 0xD, 0xA, '    (Error Code: 0x0003)', 0xD, 0xA, 0x0
+bad_disk_image_end_sig_err_msg:     db 'The disk image heading ending signature is invalid', 0xD, 0xA, '    (Error Code: 0x0004)', 0xD, 0xA, 0x0
+unknown_err_msg: db 'An unknown error has occurred', 0xD, 0xA, 0x0
 
-global enter_rmode_and_test
+;
+; The address `0x1000` to `0x1001` (1 byte) will tell the program if an error occurred.
+;
+error_control_addr equ 0x1000
+
+global enter_rmode_and_raise_err
 use32
-enter_rmode_and_test:
+enter_rmode_and_raise_err:
     __x86_EnterRealMode
 
     push ebp
@@ -110,8 +119,11 @@ enter_rmode_and_test:
     cmp ax, bad_disk_image_header_sig
     je .bdihs   ; bad disk image header sig (bdihs)
 
-    cmp ax, unknown_protocol_revision
-    je .upr     ; unknown protocol revision (upr)
+    cmp ax, invalid_mjr_revision
+    je .imajr     ; invalid major revision (imajr)
+
+    cmp ax, invalid_mnr_revision
+    je .iminr    ; invalid minor revision (iminr)
 
     cmp ax, bad_disk_image_end_sig
     je .bdihes  ; bad disk images header end sig (bdihes)
@@ -119,32 +131,79 @@ enter_rmode_and_test:
     mov si, unknown_err_msg
     call print
 
-    jmp $
+    jmp .r
 .bdihs:
     mov si, bad_disk_image_header_sig_err_msg
     call print
 
-    jmp $
-.upr:
-    mov si, unknown_protocol_revision_err_msg
+    mov byte [error_control_addr], 0x1 ; true
+
+    jmp .r
+.imajr:
+    mov si, invalid_mjr_revision_err_msg
     call print
 
-    jmp $
+    mov byte [error_control_addr], 0x1 ; true
+
+    jmp .r
+.iminr:
+    mov si, invalid_mnr_revision_err_msg
+    call print
+
+    mov byte [error_control_addr], 0x1 ; true
+
+    jmp .r
 .bdihes:
     mov si, bad_disk_image_end_sig_err_msg
     call print
 
-    jmp $
+    mov byte [error_control_addr], 0x1 ; true
+
+    jmp .r
 .ag:
+    jmp .r;mov byte [error_control_addr], 0x0 ; false
+.r:
     enter_protected_mode
     ret
 
+global enter_rmode_and_hlt
+use32
+enter_rmode_and_hlt:
+    __x86_EnterRealMode
+
+    cli
+    hlt
+    jmp $
 
 global enter_pmode
 use16
 enter_pmode:
     enter_protected_mode
     
+    use32
+    ret
+
+global enter_rmode_n
+use32
+enter_rmode_n:
+    __x86_EnterRealMode
+
+    push ebp
+    mov ebp, esp
+    
+    mov si, [ebp + 8]
+
+    pop ebp
+
+    pusha
+    call print
+
+    mov ah, 0x0E
+    mov al, ' '
+    int 0x10
+    popa
+
+    enter_protected_mode
     ret
 
 %include "protocol/bit16_IO/bit16_print.s"

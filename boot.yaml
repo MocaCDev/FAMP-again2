@@ -3,6 +3,7 @@ os_type: "bit32"
 os_name: "TestOS"
 os_version: "1.0.1"
 pref_FS: "FAMP"
+pref_vid_mode: "vesa"
 production: "yes"
 
 # Disk image info

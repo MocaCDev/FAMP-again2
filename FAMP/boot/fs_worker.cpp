@@ -8,21 +8,37 @@ void __START main()
 {
     puint8 addr = (puint8) 0xB8000;
 
-    struct FAMP_FS_HEADER *fs_header = (struct FAMP_FS_HEADER *) filesystem;
     struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *dimg_heading = (struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *) FAMP_DISK_IMAGE_HDR_ADDR;
     dimg_heading->finalize_disk_image_heading();
+    dimg_heading->check_disk_image_heading(error_control_addr);
 
-    enter_rmode_and_test(dimg_heading->disk_image_is_good());
+    struct FAMP_FS_HEADER *fs_header = (struct FAMP_FS_HEADER *) (fs_addr);
+    fs_header->finalize_fs_header();
 
-    enter_rmode();
+    fs_addr += sizeof(*fs_header);
+    struct FAMP_FS_PARTITION_METADATA *kernel_partition_metadata = (struct FAMP_FS_PARTITION_METADATA *) (fs_addr);
+    kernel_partition_metadata->finalize_partition_metadata();
+
+    fs_addr += sizeof(*kernel_partition_metadata);
     
-    if(fs_header->FampFS_Sig[0] == 'F' && fs_header->FampFS_Sig[5] == 'S')
+    uint32 i = 0;
+    while(i < kernel_partition_metadata->PartitionByteSize)
     {
-        addr[2] = 'D';
-        addr[4] = 'I';
-        addr[6] = 'C';
-        addr[8] = 'K';
+        kernel_virtual_address[i] = *fs_addr;
+        fs_addr++;
+        i++;
     }
+
+    /* Move the FS header to the next available address directly following the last byte of the kernel. */
+    uint8 *new_addr = kernel_virtual_address + i;
+
+    struct FAMP_FS_HEADER *new_fs_header = (struct FAMP_FS_HEADER *) new_addr;
+    *new_fs_header = *fs_header;
+
+    fs_header = nullptr;
+
+    enter_rmode_and_stay();
+    __asm__("jmp 0x0:0x7EC8");
 
     while(true);
 }

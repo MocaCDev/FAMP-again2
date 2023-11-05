@@ -9,12 +9,13 @@ jmp 0x0:start
 ;
 FAMP_spec_MBR_header:
     .sig                        db 'FAMP', 0x0, 0x0
-    .rev                        dw 0x1000, 0x0
+    .rev                        dw 0x0101, 0x0
     .usable_entries             db 0x02,
     .entry_locs                 dw 0x1BE, 0x1CE, 0x0, 0x0
 	.os_name					db '%s', 0x0
 	.os_type					db 0x%X
 	.os_version					db '%s', 0x0
+	.os_vid_mode				db '%c'
 	.filesystem_used			db 0x%X
 	.in_production				db 0x%X
     .end                        db 'EE', 0x0, 0x0

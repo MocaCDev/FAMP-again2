@@ -13,6 +13,7 @@ struct yaml_os_data
     puint8       OS_name;
     puint8       OS_version;
     uint8        FS_type;
+    uint8        OS_vid_mode;
 
     /* Disk image name. */
     puint8       disk_name;

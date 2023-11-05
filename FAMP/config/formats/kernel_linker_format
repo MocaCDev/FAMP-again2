@@ -3,9 +3,11 @@ SECTIONS {
     /* Program starts at 0x0700. */
     . = 0xA000;
 
-    filesystem = 0xF000;
-    error_control_addr = 0x1000;
-    kernel_virtual_address = 0x80000000;
+    /* MBR related addresses. */
+    disk_image_heading = 0x0900;
+    mbr_entry_code = 0x0A84;
+
+    filesystem = 0x%X;
 
     .text : AT(0xA000)
     {

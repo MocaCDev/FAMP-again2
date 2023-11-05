@@ -9,6 +9,13 @@ using namespace YamlParser;
  * */
 uint16 starting_sector     = 0x02;
 
+/*
+ * This is the virtual address as to which the kernel will be located at.
+ * We will add the number of bytes the kernel takes up to this to decipher the address
+ * of the FS.
+ * */
+#define kernel_virtual_address 0x80000000
+
 namespace ConfigFiles
 {
     cpint8 mbr_format = (cpint8) initiate_path((pint8)"formats/", (pint8)"mbr_format");
@@ -18,6 +25,7 @@ namespace ConfigFiles
     cpint8 fs_bin = (cpint8) initiate_path((pint8)"../bin/", (pint8)"fs.bin");
     cpint8 fs_worker_bin = (cpint8) initiate_path((pint8) "../bin/", (pint8)"fs_worker.bin");
     cpint8 second_stage_bin = (cpint8) initiate_path((pint8) "../bin/", (pint8)"second_stage.bin");
+    cpint8 kernel_linker = (cpint8) initiate_path((pint8) "formats/", (pint8) "kernel_linker_format");
 
     enum class FileToConfigure: uint8_t
     {
@@ -27,6 +35,7 @@ namespace ConfigFiles
         OldMakefile,
         FileSystem,
         OldFilesystem,
+        KernelLinker,
         None
     };
 
@@ -79,6 +88,7 @@ namespace ConfigFiles
             switch(ftc)
             {
                 case FileToConfigure::None: break;
+                case FileToConfigure::KernelLinker: config_file = fopen(kernel_linker, "r");break;
                 case FileToConfigure::UserMakefile: config_file = fopen(user_makefile, "r");break;
                 case FileToConfigure::ProtocolMakefile: config_file = fopen(protocol_makefile, "r");break;
                 case FileToConfigure::MBR: config_file = fopen(mbr_format, "r");break;
@@ -97,6 +107,7 @@ namespace ConfigFiles
             /* Based on `file_being_configured`, open the according source file. */
             switch(file_being_configured)
             {
+                case FileToConfigure::KernelLinker: needs_to_format = true;source_file = fopen("../linker/kernel.ld", "w");break;
                 case FileToConfigure::UserMakefile: source_file = fopen("../../Makefile", "w");break;
                 case FileToConfigure::ProtocolMakefile: needs_to_format = true;source_file = fopen("../Makefile", "w");break;
                 case FileToConfigure::MBR: needs_to_format = true;source_file = fopen("../boot/mbr.s", "w");break;
@@ -112,6 +123,27 @@ namespace ConfigFiles
             {
                 uint8 completed_format[strlen((cpint8) format) + 120];
                 memset(completed_format, 0, strlen((cpint8) format) + 120);
+
+                if(file_being_configured == FileToConfigure::KernelLinker)
+                {
+                    uint8 kernel_bin_path[40] = "../../%s";
+                    uint8 abs_kernel_bin_path[40];
+
+                    memset(abs_kernel_bin_path, 0, 40);
+
+                    sprintf((pint8) abs_kernel_bin_path, (cpint8)kernel_bin_path,
+                        yod.kernel_bin_filename);
+                    
+                    FILE *kernel_bin = fopen((cpint8)abs_kernel_bin_path, "rb");
+
+                    fseek(kernel_bin, 0, SEEK_END);
+                    size_t kernel_bin_size = ftell(kernel_bin);
+                    fseek(kernel_bin, 0, SEEK_SET);
+                    fclose(kernel_bin);
+
+                    sprintf((pint8) completed_format, (cpint8)format, kernel_virtual_address + kernel_bin_size);
+                    goto write;
+                }
 
                 if(file_being_configured == FileToConfigure::ProtocolMakefile)
                 {
@@ -207,7 +239,7 @@ namespace ConfigFiles
                     /* TODO: This needs some work. */
                     sprintf((pint8) completed_format, (cpint8) format,
                         os_name, yod.type, yod.OS_version,
-                        yod.FS_type, yod.in_production,
+                        yod.OS_vid_mode, yod.FS_type, yod.in_production,
                         0x02 + (ssbin_size / 512),
                         (ssbin_size / 512),
                         starting_sector,
