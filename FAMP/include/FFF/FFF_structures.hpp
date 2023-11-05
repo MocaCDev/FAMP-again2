@@ -55,6 +55,18 @@ namespace FFF_Structures
         FT_EXT      = 1 << 0x07
     };
 
+    /*
+     * Error codes for `disk_image_is_good`, a function that checks the disk image
+     * heading to see if it's valid.
+     * */
+    enum DiskImageHeadingErrorCodes
+    {
+        AllGood             = 0x0,
+        BadHeaderSig        = 0x1,
+        UnknownProtocolRev  = 0x2,
+        BadHeaderEndSig     = 0x3
+    };
+
     struct FAMP_PROTOCOL_DISK_IMAGE_HEADING
     {
         uint32          HeaderSig;
@@ -88,13 +100,18 @@ namespace FFF_Structures
                 HeaderEnd = revert_value<uint16>(HeaderEnd);
         }
 
-        bool disk_image_is_good()
+        enum DiskImageHeadingErrorCodes disk_image_is_good()
         {
-            if(HeaderSig == FAMP_HEADER_START_SIGNATURE &&
-               HeaderEnd == FAMP_HEADER_END_SIGNATURE &&
-               ProtocolRevision == FAMP_CURRENT_REVISION) return true;
+            if(!(HeaderSig == FAMP_HEADER_START_SIGNATURE))
+                return BadHeaderSig;
             
-            return false;
+            if(!(HeaderEnd == FAMP_HEADER_END_SIGNATURE))
+                return BadHeaderEndSig;
+            
+            if(!(ProtocolRevision == FAMP_CURRENT_REVISION))
+                return UnknownProtocolRev;
+            
+            return AllGood;
         }
         #endif
 

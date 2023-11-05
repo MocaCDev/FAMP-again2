@@ -12,8 +12,7 @@ void __START main()
     struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *dimg_heading = (struct FAMP_PROTOCOL_DISK_IMAGE_HEADING *) FAMP_DISK_IMAGE_HDR_ADDR;
     dimg_heading->finalize_disk_image_heading();
 
-    if(!dimg_heading->disk_image_is_good())
-        enter_rmode_and_stay();
+    enter_rmode_and_test(dimg_heading->disk_image_is_good());
 
     enter_rmode();
     

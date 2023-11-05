@@ -86,7 +86,7 @@ namespace FAMP_FS
      * */
     enum class RelocationAction
     {
-        Relocate = 0x1,               /* If this is set, this tells the protocol (OS) that the partition (file) is being temporarily relocated, and that `RelocateBack` will occur. */
+        Relocate = 0x1,         /* If this is set, this tells the protocol (OS) that the partition (file) is being temporarily relocated, and that `RelocateBack` will occur. */
         RelocateAndStay,        /* If this is set, this tells the protocol (OS) that the partition (file) is being permanently relocated. */
         RelocateBack            /* If this is set, this tells the protocol (OS) that the partition (file) can be loaded into its original address. */
     };
