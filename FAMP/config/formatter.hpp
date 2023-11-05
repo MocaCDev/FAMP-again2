@@ -116,8 +116,11 @@ namespace FileFormatter
                 if(subheading.SubHeadingSig != 0x0)
                     bytes_needed -= sizeof(subheading);
                 
-                uint8 padding[bytes_needed - file_size];
-                memset(padding, 0, bytes_needed - file_size);
+                if(!(bytes_needed < file_size))
+                    bytes_needed -= file_size;
+                
+                uint8 padding[bytes_needed];
+                memset(padding, 0, bytes_needed);
 
                 get_file_data(file_size);
 
@@ -127,7 +130,7 @@ namespace FileFormatter
                     open_file(filename, "wb");
                     if(subheading.SubHeadingSig != 0x0) fwrite(&subheading, 1, sizeof(subheading), binary);
                     fwrite(file_data, file_size, sizeof(*file_data), binary);
-                    fwrite(&padding, bytes_needed - file_size, sizeof(uint8), binary);
+                    fwrite(&padding, bytes_needed, sizeof(uint8), binary);
                     if(mem_stamp.MemID != 0x0) fwrite((const void *)&mem_stamp, 1, sizeof(mem_stamp), binary);
                     fclose(binary);
                 }
@@ -186,7 +189,7 @@ namespace FileFormatter
                     open_file((cpint8) "../bin/fs_worker.bin", "rb");
 
                     init_mem_stamp(FAMP_MEM_STAMP_FS_WORKER);
-                    pad_binary((cpint8) "../bin/fs_worker.bin", 1024);
+                    pad_binary((cpint8) "../bin/fs_worker.bin", 0);
 
                     delete file_data;
                     mem_stamp.MemID = 0x0;

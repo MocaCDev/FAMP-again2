@@ -28,7 +28,7 @@ FAMP_FS_PARTITION_METADA:
     .WillReturn db          0x0 ; False
     .OriginalAddress dd     0x0
     .RelocateAcc db         0x0 ; No relocation action
-    .padding2               times 0xD9 db 0x0 ; 0xD9 = 0x100 - 35 = ((512 - 0x100) - 35)
+    .padding2               times 0xD7 db 0x0 ; 0xD7 = 0x100 - 41 = ((512 - 0x100) - 41)
     .PartitionBeginSig db   'PBEG'
 
 incbin "../bin/kernel.bin"

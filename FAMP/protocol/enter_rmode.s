@@ -63,23 +63,20 @@ enter_rmode:
 
     ret
 
+;
+; For now, this is for errors. We will change this later (TODO)
+;
 global enter_rmode_and_stay
 use32
 enter_rmode_and_stay:
     __x86_EnterRealMode
 
-    ret
-
-global enter_rmode_and_hlt
-use32
-enter_rmode_and_hlt:
-    __x86_EnterRealMode
+    mov ah, 0x0E
+    mov al, 'E'
+    int 0x10
 
     cli
     hlt
-    jmp $
-
-tes equ 0x1000
 
 global enter_pmode
 use16

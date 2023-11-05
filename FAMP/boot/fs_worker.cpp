@@ -13,7 +13,9 @@ void __START main()
     dimg_heading->finalize_disk_image_heading();
 
     if(!dimg_heading->disk_image_is_good())
-        enter_rmode_and_hlt();
+        enter_rmode_and_stay();
+
+    enter_rmode();
     
     if(fs_header->FampFS_Sig[0] == 'F' && fs_header->FampFS_Sig[5] == 'S')
     {
