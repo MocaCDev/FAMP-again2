@@ -4,6 +4,45 @@
 
 /* TODO: Might delete and make the second stage do it all. */
 
+struct SMAP_entry {
+	uint64  address;
+	uint64  length;
+	uint32 Type; // entry Type
+	uint32 ACPI; // extended
+}__attribute__((packed));
+
+uint32 detectMemory(SMAP_entry* buffer, uint32 maxentries)
+{
+	uint32 contID = 0;
+	int entries = 0;
+    int signature;
+    int bytes;
+	do 
+	{
+		__asm__ __volatile__ ("int  0x15" 
+				: "=a"(signature), "=c"(bytes), "=b"(contID)
+				: "a"(0xE820), "b"(contID), "c"(24), "d"(0x534D4150), "D"(buffer));
+		
+        if (signature != 0x534D4150) 
+			return -1; // error
+		
+        if (bytes > 20 && (buffer->ACPI & 0x0001) == 0)
+		{
+            break;
+			continue;
+		}
+		else {
+			buffer++;
+			entries++;
+		}
+	} 
+	while (contID != 0 && entries < maxentries);
+
+	return entries;
+}
+
+extern struct SMAP_entry smap[];
+
 void __START main()
 {
     puint8 addr = (puint8) 0xB8000;
@@ -30,15 +69,14 @@ void __START main()
     }
 
     /* Move the FS header to the next available address directly following the last byte of the kernel. */
-    uint8 *new_addr = kernel_virtual_address + i;
-
-    struct FAMP_FS_HEADER *new_fs_header = (struct FAMP_FS_HEADER *) new_addr;
+    struct FAMP_FS_HEADER *new_fs_header = (struct FAMP_FS_HEADER *) new_filesystem_address;
     *new_fs_header = *fs_header;
 
     fs_header = nullptr;
 
     enter_rmode_and_stay();
-    __asm__("jmp 0x0:0x7EC8");
+
+    __asm__("jmp 0x0:0x7EE9");
 
     while(true);
 }

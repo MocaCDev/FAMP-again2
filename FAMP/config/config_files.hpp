@@ -14,7 +14,7 @@ uint16 starting_sector     = 0x02;
  * We will add the number of bytes the kernel takes up to this to decipher the address
  * of the FS.
  * */
-#define kernel_virtual_address 0x80000000
+#define kernel_virtual_address 0x20000000
 
 namespace ConfigFiles
 {
@@ -26,6 +26,7 @@ namespace ConfigFiles
     cpint8 fs_worker_bin = (cpint8) initiate_path((pint8) "../bin/", (pint8)"fs_worker.bin");
     cpint8 second_stage_bin = (cpint8) initiate_path((pint8) "../bin/", (pint8)"second_stage.bin");
     cpint8 kernel_linker = (cpint8) initiate_path((pint8) "formats/", (pint8) "kernel_linker_format");
+    cpint8 fs_linker = (cpint8) initiate_path((pint8)"formats/", (pint8)"fs_worker_linker_format");
 
     enum class FileToConfigure: uint8_t
     {
@@ -36,6 +37,7 @@ namespace ConfigFiles
         FileSystem,
         OldFilesystem,
         KernelLinker,
+        FSLinker,
         None
     };
 
@@ -89,6 +91,7 @@ namespace ConfigFiles
             {
                 case FileToConfigure::None: break;
                 case FileToConfigure::KernelLinker: config_file = fopen(kernel_linker, "r");break;
+                case FileToConfigure::FSLinker: config_file = fopen(fs_linker, "r");break;
                 case FileToConfigure::UserMakefile: config_file = fopen(user_makefile, "r");break;
                 case FileToConfigure::ProtocolMakefile: config_file = fopen(protocol_makefile, "r");break;
                 case FileToConfigure::MBR: config_file = fopen(mbr_format, "r");break;
@@ -108,6 +111,7 @@ namespace ConfigFiles
             switch(file_being_configured)
             {
                 case FileToConfigure::KernelLinker: needs_to_format = true;source_file = fopen("../linker/kernel.ld", "w");break;
+                case FileToConfigure::FSLinker: needs_to_format = true; source_file = fopen("../linker/fs_worker.ld", "w");break;
                 case FileToConfigure::UserMakefile: source_file = fopen("../../Makefile", "w");break;
                 case FileToConfigure::ProtocolMakefile: needs_to_format = true;source_file = fopen("../Makefile", "w");break;
                 case FileToConfigure::MBR: needs_to_format = true;source_file = fopen("../boot/mbr.s", "w");break;
@@ -124,7 +128,7 @@ namespace ConfigFiles
                 uint8 completed_format[strlen((cpint8) format) + 120];
                 memset(completed_format, 0, strlen((cpint8) format) + 120);
 
-                if(file_being_configured == FileToConfigure::KernelLinker)
+                if(file_being_configured == FileToConfigure::KernelLinker || file_being_configured == FileToConfigure::FSLinker)
                 {
                     uint8 kernel_bin_path[40] = "../../%s";
                     uint8 abs_kernel_bin_path[40];

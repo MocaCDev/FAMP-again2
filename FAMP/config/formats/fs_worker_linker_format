@@ -6,7 +6,7 @@ SECTIONS {
     filesystem = 0xF000;
     error_control_addr = 0x1000;
     kernel_virtual_address = 0x20000000;
-    new_filesystem_address = 0x20000600;
+    new_filesystem_address = 0x%X;
 
     .text : AT(0xA000)
     {

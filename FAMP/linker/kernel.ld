@@ -7,7 +7,12 @@ SECTIONS {
     disk_image_heading = 0x0900;
     mbr_entry_code = 0x0A84;
 
-    filesystem = 0x80000200;
+    /* Just in case we need this later on. */
+    phys_filesystem = 0xF000;
+    memory_map = 0x8504;
+    memory_map_entries = 0x8500;
+
+    filesystem = 0x20000600;
 
     .text : AT(0xA000)
     {

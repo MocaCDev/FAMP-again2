@@ -43,6 +43,9 @@ int main(int args, char *argv[])
         ConfigureFiles cf(FileToConfigure::KernelLinker);
         cf.write_file();
 
+        cf.set_new_file_being_configured(FileToConfigure::FSLinker);
+        cf.write_file();
+
         goto end;
     }
 

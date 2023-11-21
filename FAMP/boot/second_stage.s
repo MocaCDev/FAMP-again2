@@ -2,6 +2,7 @@
 use16
 
 start:
+
 ;
 ; Per the current revision of FAMPs spec, if `IsAsmProgram` is true (1)
 ; there needs to be a assembly program header that follows directly after the
@@ -84,14 +85,78 @@ mov al, THIRD_ENTRY_SECTOR_AMOUNT
 mov cl, THIRD_ENTRY_START_SECTOR
 call read_disk
 
+; Get memory map
+xor ax, ax
+mov es, ax
+mov di, ax
+
+memmap_entries	equ 0x8500
+get_mem_map:
+    push bp
+	mov di, 0x8504
+	xor ebx, ebx
+	xor bp, bp
+	
+	mov edx, 'PAMS'
+	mov eax, 0xE820
+	mov [es:di + 20], dword 1
+	mov ecx, 24
+	int 0x15
+	jc .error
+	
+	cmp eax, 'PAMS'
+	jne .error
+	test ebx, ebx
+	jz .error
+	jmp .start
+.next_entry:
+	mov edx, 'PAMS'
+	mov ecx, 24
+	mov eax, 0xE820
+	int 0x15
+.start:
+	jcxz .skip
+	mov ecx, [es:di + 8]
+	or ecx, [es:di + 12]
+	jz .skip
+.good:
+	inc bp
+	add di, 24
+.skip:
+	test ebx, ebx
+	jz .done
+	jmp .next_entry
+.error:
+	mov ah, 0x0e
+	mov al, 'F'
+	int 0x10
+
+	cli
+	hlt
+.done:
+	mov [memmap_entries], bp
+    pop bp
+    clc
+
 ; Load the GDT and go to the program that relocates the FileSystem (FS) and kernel
 call __load_gdt
 
-times 200 - ($ - $$) db 0x0
+times 233 - ($ - $$) db 0x0
 
 call enter_pmode
 use32
-jmp word 0x8:0x80000000
+
+;
+; Since we do go to another program which returns back to 16-bit,
+; we set up the stack directly before jumping to the kernel to avoid
+; any corruption/complication.
+;
+
+mov ebp, 0xFFFFFFFF ; I have no idea if this is correct lol
+mov eax, 0x1FFFFFFF
+mov esp, eax
+
+jmp word 0x8:0x20000000
 
 jmp $
 

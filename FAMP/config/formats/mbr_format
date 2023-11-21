@@ -1,6 +1,8 @@
 [org 0x7C00]
 use16
 
+section .text
+
 jmp 0x0:start
 
 ;
@@ -34,10 +36,11 @@ start:
 	mov fs, ax
 	mov gs, ax
 
+	mov ax, 0x0800
 	cli
-	mov bp, 0x7C00
-	mov sp, bp
 	mov ss, ax
+	mov bp, 0x7BFF
+	mov sp, bp
 	sti
 
 	; Using the MBR partition table entry, read in the second stage bootloader

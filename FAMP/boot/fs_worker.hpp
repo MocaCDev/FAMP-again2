@@ -16,6 +16,7 @@ using namespace FAMP_FS;
 extern uint8 filesystem[];
 extern uint8 error_control_addr[];
 extern uint8 kernel_virtual_address[];
+extern uint8 new_filesystem_address[];
 uint8 *fs_addr = filesystem;
 
 #endif

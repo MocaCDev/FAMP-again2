@@ -214,6 +214,22 @@ void read_in_memory(uint16 addr, uint8 start_sector, uint8 sector_amount)
 }
 #endif
 
+#ifdef KERNEL
+#include <bootloader/rmode_functions.hpp>
+#include <FFS/FAMP_fs.hpp>
+#include <FFF/FFF_structures.hpp>
+
+/* TODO: Move this functions into there own header file. */
+void print(uint8 *value);
+void PrintHex(uint32 number);
+
+#include <mem_map/memory_map.hpp>
+
+using namespace FFF_Structures;
+using namespace FAMP_FS;
+using namespace FAMP_MemoryMap;
+#endif
+
 #ifdef BIT32_PROGRAM
 /*
  *  __inp: back-end function
