@@ -28,7 +28,7 @@ namespace ConfigFiles
     cpint8 kernel_linker = (cpint8) initiate_path((pint8) "formats/", (pint8) "kernel_linker_format");
     cpint8 fs_linker = (cpint8) initiate_path((pint8)"formats/", (pint8)"fs_worker_linker_format");
 
-    enum class FileToConfigure: uint8_t
+    enum class FileToConfigure//: uint8_t
     {
         UserMakefile,
         ProtocolMakefile,
@@ -239,6 +239,7 @@ namespace ConfigFiles
                     uint8 os_name[14];
                     memset(os_name, ' ', 14);
                     memcpy(os_name, yod.OS_name, strlen((cpint8) yod.OS_name));
+                    os_name[14] = '\0';
 
                     /* TODO: This needs some work. */
                     sprintf((pint8) completed_format, (cpint8) format,

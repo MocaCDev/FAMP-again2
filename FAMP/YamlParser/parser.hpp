@@ -48,7 +48,8 @@ private:
         switch(yparser->ytoken->id)
         {
             case YamlTokens::user_def: {
-                puint8 user_defined_var = new uint8[strlen((cpint8) yparser->ytoken->token_value)];
+                /* Using `calloc` since `new` seems to be error prone on Kali-linux. */
+                puint8 user_defined_var = static_cast<puint8>(calloc(strlen((cpint8) yparser->ytoken->token_value), sizeof(*user_defined_var)));//new uint8[strlen((cpint8) yparser->ytoken->token_value)];
                 memcpy(user_defined_var, yparser->ytoken->token_value, strlen((cpint8) yparser->ytoken->token_value));
                 
                 get_token_from_lexer();
@@ -79,7 +80,7 @@ private:
                 }
 
                 memset(user_defined_var, 0, strlen((cpint8) user_defined_var));
-                delete user_defined_var;
+                free((void *)user_defined_var);
                 break;
             }
             case YamlTokens::YamlEOF: {

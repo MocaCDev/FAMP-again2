@@ -13,7 +13,7 @@
 /* Initial disk image header information.
  * The initial disk image header resides inside the first sector of the disk image (first 512 bytes).
  * */
-#define FAMP_HEADER_START_SIGNATURE             0x46414D50      /* FAMP */
+#define FAMP_HEADER_START_SIGNATURE             (int)0x46414D50      /* FAMP */
 #define FAMP_HEADER_END_SIGNATURE               0x4545          /* EE */
 #define FAMP_CURRENT_MJR_REVISION               0x01
 #define FAMP_CURRENT_MNR_REVISION               0x01
@@ -124,11 +124,11 @@ namespace FFF_Structures
         }
         #endif
 
-    #ifdef OS_RELATED
+    //#ifdef OS_RELATED
     } __attribute__((packed));
-    #else
-    };
-    #endif
+    //#else
+    //};
+    //#endif
 
     struct FAMP_PROTOCOL_SUBHEADING
     {
